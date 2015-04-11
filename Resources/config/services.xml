@@ -32,6 +32,11 @@
         <parameter key="lexik_mailer.form.type.mailer_layout.class">Lexik\Bundle\MailerBundle\Form\Type\LayoutType</parameter>
         <parameter key="lexik_mailer.form.type.mailer_layout_translation.class">Lexik\Bundle\MailerBundle\Form\Type\LayoutTranslationType</parameter>
 
+        <parameter key="lexik_mailer.repository.email.class">Lexik\Bundle\MailerBundle\Doctrine\EmailRepository</parameter>
+
+        <parameter key="lexik_mailer.manager.email.class">Lexik\Bundle\MailerBundle\Doctrine\EmailManager</parameter>
+        <parameter key="lexik_mailer.manager.layout.class">Lexik\Bundle\MailerBundle\Doctrine\LayoutManager</parameter>
+
         <parameter key="lexik_mailer.form.handler.email.class">Lexik\Bundle\MailerBundle\Form\Handler\EmailFormHandler</parameter>
         <parameter key="lexik_mailer.form.handler.layout.class">Lexik\Bundle\MailerBundle\Form\Handler\LayoutFormHandler</parameter>
     </parameters>
@@ -104,10 +109,12 @@
 
         <service id="lexik_mailer.form.type.mailer_email" class="%lexik_mailer.form.type.mailer_email.class%">
             <tag name="form.type" alias="mailer_email" />
+            <argument>%lexik_mailer.layout_entity.class%</argument>
         </service>
 
         <service id="lexik_mailer.form.type.mailer_email_translation" class="%lexik_mailer.form.type.mailer_email_translation.class%">
             <tag name="form.type" alias="mailer_email_translation" />
+            <argument>%lexik_mailer.preferred_languages%</argument>
         </service>
 
         <service id="lexik_mailer.form.type.mailer_layout" class="%lexik_mailer.form.type.mailer_layout.class%">
@@ -116,18 +123,38 @@
 
         <service id="lexik_mailer.form.type.mailer_layout_translation" class="%lexik_mailer.form.type.mailer_layout_translation.class%">
             <tag name="form.type" alias="mailer_layout_translation" />
+            <argument>%lexik_mailer.preferred_languages%</argument>
+        </service>
+
+        <!-- Repository -->
+        <service id="lexik_mailer.repository.email" class="%lexik_mailer.repository.email.class%"
+                factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
+            <argument>%lexik_mailer.email_entity.class%</argument>
+        </service>
+
+        <!-- Manager -->
+        <service id="lexik_mailer.manager.email" class="%lexik_mailer.manager.email.class%">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument>%lexik_mailer.email_entity.class%</argument>
+            <argument>%lexik_mailer.email_translation_entity.class%</argument>
+        </service>
+
+        <service id="lexik_mailer.manager.layout" class="%lexik_mailer.manager.layout.class%">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument>%lexik_mailer.layout_entity.class%</argument>
+            <argument>%lexik_mailer.layout_translation_entity.class%</argument>
         </service>
 
         <!-- Form handler -->
         <service id="lexik_mailer.form.handler.email" class="%lexik_mailer.form.handler.email.class%">
             <argument type="service" id="form.factory" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="lexik_mailer.manager.email" />
             <argument>%locale%</argument>
         </service>
 
         <service id="lexik_mailer.form.handler.layout" class="%lexik_mailer.form.handler.layout.class%">
             <argument type="service" id="form.factory" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="lexik_mailer.manager.layout" />
             <argument>%locale%</argument>
         </service>
 

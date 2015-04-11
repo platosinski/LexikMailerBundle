@@ -2,12 +2,9 @@
 
 namespace Lexik\Bundle\MailerBundle\Form\Handler;
 
-use Doctrine\ORM\EntityManager;
-
-use Lexik\Bundle\MailerBundle\Entity\Email;
-use Lexik\Bundle\MailerBundle\Entity\EmailTranslation;
+use Lexik\Bundle\MailerBundle\Entity\BaseEmail;
 use Lexik\Bundle\MailerBundle\Form\Model\EntityTranslationModel;
-
+use Lexik\Bundle\MailerBundle\Model\EmailManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,9 +20,9 @@ class EmailFormHandler implements FormHandlerInterface
     private $factory;
 
     /**
-     * @var EntityManager
+     * @var EmailManagerInterface
      */
-    private $em;
+    private $manager;
 
     /**
      * @var string
@@ -38,14 +35,14 @@ class EmailFormHandler implements FormHandlerInterface
     private $locale;
 
     /**
-     * @param FormFactoryInterface $factory
-     * @param EntityManager        $em
-     * @param string               $defaultLocale
+     * @param FormFactoryInterface  $factory
+     * @param EmailManagerInterface $manager
+     * @param string                $defaultLocale
      */
-    public function __construct(FormFactoryInterface $factory, EntityManager $em, $defaultLocale)
+    public function __construct(FormFactoryInterface $factory, EmailManagerInterface $manager, $defaultLocale)
     {
         $this->factory = $factory;
-        $this->em = $em;
+        $this->manager = $manager;
         $this->defaultLocale = $defaultLocale;
     }
 
@@ -58,7 +55,9 @@ class EmailFormHandler implements FormHandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param BaseEmail $email
+     * @param string    $lang
+     * @return FormInterface
      */
     public function createForm($email = null, $lang = null)
     {
@@ -67,9 +66,13 @@ class EmailFormHandler implements FormHandlerInterface
 
         if ($edit) {
             $translation = $email->getTranslation($this->locale);
+            if ($translation === null) {
+                $translation = $this->manager->createEmailTranslation($email, $this->locale);
+                $translation->setEmail($email);
+            }
         } else {
-            $email = new Email();
-            $translation = new EmailTranslation($this->defaultLocale);
+            $email = $this->manager->createEmail();
+            $translation = $this->manager->createEmailTranslation($email, $this->defaultLocale);
             $translation->setEmail($email);
         }
 
@@ -93,8 +96,7 @@ class EmailFormHandler implements FormHandlerInterface
             $model = $form->getData();
             $model->getEntity()->addTranslation($model->getTranslation());
 
-            $this->em->persist($model->getEntity());
-            $this->em->flush();
+            $this->manager->save($model->getEntity());
 
             $valid = true;
         }

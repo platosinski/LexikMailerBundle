@@ -2,7 +2,9 @@
 
 namespace Lexik\Bundle\MailerBundle\Tests\Message;
 
-use Lexik\Bundle\MailerBundle\Exception\ReferenceNotFoundException;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Lexik\Bundle\MailerBundle\Mapping\Driver\Annotation as AnnotationDriver;
+use Lexik\Bundle\MailerBundle\Signer\SignerFactory;
 use Lexik\Bundle\MailerBundle\Twig\Loader\EmailLoader;
 use Lexik\Bundle\MailerBundle\Message\MessageRenderer;
 use Lexik\Bundle\MailerBundle\Message\MessageFactory;
@@ -54,7 +56,7 @@ class MessageFactoryTest extends BaseUnitTestCase
         $body = <<<EOF
 An error occurred while trying to send an email.
 You tried to use a reference that does not exist : "this-reference-does-not-exist"
-in "{$file}" at line 60
+in "{$file}" at line 62
 EOF;
 
         $message = $factory->get('this-reference-does-not-exist', 'chuk@email.fr', array('name' => 'chuck'));
@@ -112,21 +114,21 @@ EOF;
     protected function createMessageFactory()
     {
         $options = array(
-            'email_class'    => 'Lexik\Bundle\MailerBundle\Entity\Email',
+            'email_class'    => 'Lexik\Bundle\MailerBundle\Tests\Entity\Email',
             'admin_email'    => 'admin@email.fr',
             'default_locale' => 'fr',
         );
 
         $loader = new EmailLoader(array());
         $templating = new \Twig_Environment($loader, array());
-        $renderer = new \Lexik\Bundle\MailerBundle\Message\MessageRenderer($templating, $loader);
+        $renderer = new MessageRenderer($templating, $loader);
 
-        $reder = new \Doctrine\Common\Annotations\AnnotationReader();
-        $annotationDriver = new \Lexik\Bundle\MailerBundle\Mapping\Driver\Annotation($reder);
+        $reader = new AnnotationReader();
+        $annotationDriver = new AnnotationDriver($reader);
 
-        $signerFactory = new \Lexik\Bundle\MailerBundle\Signer\SignerFactory(array());
+        $signerFactory = new SignerFactory(array());
 
-        return new MessageFactory($this->em, $renderer, $annotationDriver, $options, $signerFactory);
+        return new MessageFactory($this->em->getRepository($options['email_class']), $renderer, $annotationDriver, $options, $signerFactory);
     }
 
     public function testGetEmail()

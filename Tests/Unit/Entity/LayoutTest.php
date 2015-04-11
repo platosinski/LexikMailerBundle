@@ -20,8 +20,8 @@ class LayoutTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($layout->getTranslation('fr'), $trans);
         $this->assertSame($layout->getTranslation('fr_FR'), $trans);
-        $this->assertEquals($layout->getTranslation('en')->getLang(), 'en');
-        $this->assertEquals($layout->getTranslation('es_ES')->getLang(), 'es');
+        $this->assertEquals($layout->getTranslation('en'), null);
+        $this->assertEquals($layout->getTranslation('es_ES'), null);
 
         $this->setExpectedException('InvalidArgumentException');
         $layout->getTranslation('foo');

@@ -1,0 +1,36 @@
+Lexik\Bundle\MailerBundle\Entity\EmailTranslation:
+    type: mappedSuperclass
+    fields:
+        lang:
+            column: lang
+            type: string
+            length: 2
+        subject:
+            column: subject
+            type: string
+        body:
+            column: body
+            type: text
+        bodyText:
+            column: body_text
+            type: text
+            nullable: true
+        fromAddress:
+            column: from_address
+            type: string
+            nullable: true
+        fromName:
+            column: from_name
+            type: string
+            nullable: true
+        createdAt:
+            column: created_at
+            type: datetime
+            nullable: true
+        updatedAt:
+            column: updated_at
+            type: datetime
+            nullable: true
+    lifecycleCallbacks:
+        prePersist: [updateTimestamps]
+        preUpdate: [updateTimestamps]

@@ -4,10 +4,11 @@ namespace Lexik\Bundle\MailerBundle\Form\Handler;
 
 use Doctrine\ORM\EntityManager;
 
+use Lexik\Bundle\MailerBundle\Entity\BaseLayout;
 use Lexik\Bundle\MailerBundle\Entity\Layout;
 use Lexik\Bundle\MailerBundle\Entity\LayoutTranslation;
 use Lexik\Bundle\MailerBundle\Form\Model\EntityTranslationModel;
-
+use Lexik\Bundle\MailerBundle\Model\LayoutManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,9 +24,9 @@ class LayoutFormHandler implements FormHandlerInterface
     private $factory;
 
     /**
-     * @var EntityManager
+     * @var LayoutManagerInterface
      */
-    private $em;
+    private $manager;
 
     /**
      * @var string
@@ -38,14 +39,14 @@ class LayoutFormHandler implements FormHandlerInterface
     private $locale;
 
     /**
-     * @param FormFactoryInterface $factory
-     * @param EntityManager        $em
-     * @param string               $defaultLocale
+     * @param FormFactoryInterface   $factory
+     * @param LayoutManagerInterface $manager
+     * @param string                 $defaultLocale
      */
-    public function __construct(FormFactoryInterface $factory, EntityManager $em, $defaultLocale)
+    public function __construct(FormFactoryInterface $factory, LayoutManagerInterface $manager, $defaultLocale)
     {
         $this->factory = $factory;
-        $this->em = $em;
+        $this->manager = $manager;
         $this->defaultLocale = $defaultLocale;
     }
 
@@ -58,7 +59,9 @@ class LayoutFormHandler implements FormHandlerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param BaseLayout $layout
+     * @param string     $lang
+     * @return FormInterface
      */
     public function createForm($layout = null, $lang = null)
     {
@@ -67,10 +70,12 @@ class LayoutFormHandler implements FormHandlerInterface
 
         if ($edit) {
             $translation = $layout->getTranslation($this->locale);
+            if ($translation === null) {
+                $translation = $this->manager->createLayoutTranslation($layout, $this->locale);
+            }
         } else {
-            $layout = new Layout();
-            $translation = new LayoutTranslation($this->defaultLocale);
-            $translation->setLayout($layout);
+            $layout = $this->manager->createLayout();
+            $translation = $this->manager->createLayoutTranslation($layout, $this->defaultLocale);
         }
 
         $model = new EntityTranslationModel($layout, $translation);
@@ -93,8 +98,7 @@ class LayoutFormHandler implements FormHandlerInterface
             $model = $form->getData();
             $model->getEntity()->addTranslation($model->getTranslation());
 
-            $this->em->persist($model->getEntity());
-            $this->em->flush();
+            $this->manager->save($model->getEntity());
 
             $valid = true;
         }

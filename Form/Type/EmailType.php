@@ -13,6 +13,21 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class EmailType extends AbstractType
 {
     /**
+     * @var string
+     */
+    protected $layoutEntity;
+
+    /**
+     * Constructor
+     *
+     * @param string $layoutEntity
+     */
+    function __construct($layoutEntity)
+    {
+        $this->layoutEntity = $layoutEntity;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -43,7 +58,6 @@ class EmailType extends AbstractType
                 'required'      => false,
             ))
             ->add('spool', 'checkbox', array(
-                'required'      => false,
                 'property_path' => 'entity.spool',
                 'required'      => false,
             ))
@@ -61,7 +75,7 @@ class EmailType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class'            => 'Lexik\Bundle\MailerBundle\Form\Model\EntityTranslationModel',
-            'layout_entity'         => 'Lexik\Bundle\MailerBundle\Entity\Layout',
+            'layout_entity'         => $this->layoutEntity,
             'data_translation'      => null,
             'edit'                  => false,
             'preferred_languages'   => array(),

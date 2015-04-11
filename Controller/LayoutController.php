@@ -21,7 +21,7 @@ class LayoutController extends Controller
     public function listAction(Request $request)
     {
         $pager = $this->get('lexik_mailer.simple_pager')->retrievePageElements(
-            'LexikMailerBundle:Layout',
+            $this->container->getParameter('lexik_mailer.layout_entity.class'),
             $request->get('page', 1)
         );
 
@@ -46,7 +46,7 @@ class LayoutController extends Controller
      */
     public function editAction(Request $request, $layoutId, $lang = null)
     {
-        $layout= $this->get('doctrine.orm.entity_manager')->find('LexikMailerBundle:Layout', $layoutId);
+        $layout= $this->get('doctrine.orm.entity_manager')->find($this->container->getParameter('lexik_mailer.layout_entity.class'), $layoutId);
 
         if (!$layout) {
             throw $this->createNotFoundException(sprintf('No layout found for id "%d".', $layoutId));
@@ -83,7 +83,7 @@ class LayoutController extends Controller
     public function deleteAction($layoutId)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $layout = $em->find('LexikMailerBundle:Layout', $layoutId);
+        $layout = $em->find($this->container->getParameter('lexik_mailer.layout_entity.class'), $layoutId);
 
         if (!$layout) {
             throw $this->createNotFoundException(sprintf('No layout found for id "%d".', $layoutId));
@@ -127,7 +127,7 @@ class LayoutController extends Controller
     public function deleteTranslationAction($translationId)
     {
         $em = $this->get('doctrine.orm.entity_manager');
-        $translation = $em->find('LexikMailerBundle:LayoutTranslation', $translationId);
+        $translation = $em->find($this->container->getParameter('lexik_mailer.layout_translation_entity.class'), $translationId);
 
         if (!$translation) {
             throw $this->createNotFoundException(sprintf('No translation found for id "%d"', $translationId));

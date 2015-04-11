@@ -2,7 +2,6 @@
 
 namespace Lexik\Bundle\MailerBundle\Message;
 
-use Doctrine\ORM\EntityManager;
 use Lexik\Bundle\MailerBundle\Exception\ReferenceNotFoundException;
 use Lexik\Bundle\MailerBundle\Model\EmailInterface;
 use Lexik\Bundle\MailerBundle\Mapping\Driver\Annotation;
@@ -11,6 +10,7 @@ use Lexik\Bundle\MailerBundle\Message\ReferenceNotFoundMessage;
 use Lexik\Bundle\MailerBundle\Message\NoTranslationMessage;
 use Lexik\Bundle\MailerBundle\Message\UndefinedVariableMessage;
 use Lexik\Bundle\MailerBundle\Message\TwigErrorMessage;
+use Lexik\Bundle\MailerBundle\Repository\EmailRepositoryInterface;
 use Lexik\Bundle\MailerBundle\Signer\SignerFactory;
 
 /**
@@ -22,8 +22,9 @@ use Lexik\Bundle\MailerBundle\Signer\SignerFactory;
 class MessageFactory
 {
     /**
-     * @var EntityManager
+     * @var EmailRepositoryInterface
      */
+    private $repository;
     protected $em;
 
     /**
@@ -54,7 +55,7 @@ class MessageFactory
     /**
      * Constructor.
      *
-     * @param EntityManager                                        $entityManager
+     * @param EmailRepositoryInterface                             $repository
      * @param MessageRenderer                                      $renderer
      * @param \Lexik\Bundle\MailerBundle\Mapping\Driver\Annotation $annotationDriver
      * @param array                                                $defaultOptions
@@ -62,9 +63,9 @@ class MessageFactory
      *
      * @internal param \Lexik\Bundle\MailerBundle\Mapping\Driver\Annotation $driver
      */
-    public function __construct(EntityManager $entityManager, MessageRenderer $renderer, Annotation $annotationDriver, $defaultOptions, SignerFactory $signer)
+    public function __construct(EmailRepositoryInterface $repository, MessageRenderer $renderer, Annotation $annotationDriver, $defaultOptions, SignerFactory $signer)
     {
-        $this->em = $entityManager;
+        $this->repository = $repository;
         $this->renderer = $renderer;
         $this->annotationDriver = $annotationDriver;
         $this->options = array_merge($this->getDefaultOptions(), $defaultOptions);
@@ -98,7 +99,9 @@ class MessageFactory
     public function getEmail($reference)
     {
         if (!isset($this->emails[$reference])) {
-            $this->emails[$reference] = $this->em->getRepository($this->options['email_class'])->findOneByReference($reference);
+            $this->emails[$reference] = $this->repository->findOneBy(array(
+                'reference' => $reference
+            ));
         }
 
         $email = $this->emails[$reference];

@@ -1,0 +1,24 @@
+Lexik\Bundle\MailerBundle\Entity\Email:
+    type: mappedSuperclass
+    repositoryClass: Lexik\Bundle\MailerBundle\Doctrine\EmailRepository
+    fields:
+        reference:
+            column: reference
+            type: string
+            length: 255
+            unique: true
+        description:
+            column: description
+            type: string
+            nullable: true
+        bcc:
+            column: bcc
+            type: string
+            nullable: true
+        spool:
+            column: spool
+            type: boolean
+        headers:
+            column: headers
+            type: array
+            nullable: true

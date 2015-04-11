@@ -4,6 +4,10 @@ namespace Lexik\Bundle\MailerBundle\Form\Model;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * Class EntityTranslationModel
+ * @package Lexik\Bundle\MailerBundle\Form\Model
+ */
 class EntityTranslationModel
 {
     /**

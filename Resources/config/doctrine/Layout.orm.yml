@@ -1,0 +1,12 @@
+Lexik\Bundle\MailerBundle\Entity\Layout:
+    type: mappedSuperclass
+    fields:
+        reference:
+            column: reference
+            type: string
+            length: 255
+            unique: true
+        description:
+            column: description
+            type: string
+            nullable: true

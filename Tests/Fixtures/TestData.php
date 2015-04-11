@@ -2,14 +2,18 @@
 
 namespace Lexik\Bundle\MailerBundle\Tests\Fixtures;
 
-use Lexik\Bundle\MailerBundle\Entity\Layout;
-use Lexik\Bundle\MailerBundle\Entity\LayoutTranslation;
-use Lexik\Bundle\MailerBundle\Entity\Email;
-use Lexik\Bundle\MailerBundle\Entity\EmailTranslation;
+use Lexik\Bundle\MailerBundle\Tests\Entity\Layout;
+use Lexik\Bundle\MailerBundle\Tests\Entity\LayoutTranslation;
+use Lexik\Bundle\MailerBundle\Tests\Entity\Email;
+use Lexik\Bundle\MailerBundle\Tests\Entity\EmailTranslation;
 
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
+/**
+ * Class TestData
+ * @package Lexik\Bundle\MailerBundle\Tests\Fixtures
+ */
 class TestData implements FixtureInterface
 {
     /**

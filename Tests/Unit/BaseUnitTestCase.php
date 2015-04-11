@@ -2,14 +2,13 @@
 
 namespace Lexik\Bundle\MailerBundle\Tests\Unit;
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\Common\Annotations\AnnotationReader;
-
-use Lexik\Bundle\MailerBundle\Tests\Fixtures\TestData;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\SimplifiedYamlDriver;
 use Doctrine\ORM\Tools\Setup;
+use Lexik\Bundle\MailerBundle\Tests\Fixtures\TestData;
 
 /**
  * Base unit test class providing functions to create a mock entity manger, load schema and fixtures.
@@ -56,9 +55,7 @@ abstract class BaseUnitTestCase extends \PHPUnit_Framework_TestCase
     {
         $cache = new \Doctrine\Common\Cache\ArrayCache();
 
-        $config = Setup::createAnnotationMetadataConfiguration(array(
-            __DIR__.'/../../Entity',
-        ), false, null, null, false);
+        $config = Setup::createConfiguration(false, null, null);
 
         $config->setMetadataCacheImpl($cache);
         $config->setQueryCacheImpl($cache);
@@ -67,6 +64,18 @@ abstract class BaseUnitTestCase extends \PHPUnit_Framework_TestCase
         $config->setAutoGenerateProxyClasses(true);
         $config->setClassMetadataFactoryName('Doctrine\ORM\Mapping\ClassMetadataFactory');
         $config->setDefaultRepositoryClassName('Doctrine\ORM\EntityRepository');
+
+        $driverChain  = new MappingDriverChain();
+
+        $driverChain->addDriver(new SimplifiedYamlDriver(array(
+            __DIR__.'/../../Resources/config/doctrine' => 'Lexik\Bundle\MailerBundle\Entity',
+        )), 'Lexik\Bundle\MailerBundle\Entity');
+
+        $driverChain->addDriver($config->newDefaultAnnotationDriver(array(
+            __DIR__.'/../Entity',
+        ), false), 'Lexik\Bundle\MailerBundle\Tests\Entity');
+
+        $config->setMetadataDriverImpl($driverChain);
 
         $conn = array(
             'driver' => 'pdo_sqlite',

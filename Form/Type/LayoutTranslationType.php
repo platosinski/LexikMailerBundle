@@ -12,6 +12,21 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class LayoutTranslationType extends AbstractType
 {
     /**
+     * @var string[]
+     */
+    protected $preferredLanguages;
+
+    /**
+     * Constructor
+     *
+     * @param string[] $preferredLanguages
+     */
+    function __construct($preferredLanguages)
+    {
+        $this->preferredLanguages = $preferredLanguages;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -35,7 +50,7 @@ class LayoutTranslationType extends AbstractType
         $resolver->setDefaults(array(
             'data_class'          => 'Lexik\Bundle\MailerBundle\Entity\LayoutTranslation',
             'with_language'       => true,
-            'preferred_languages' => array('en', 'fr', 'es', 'de', 'it', 'pt', 'ja', 'zh'),
+            'preferred_languages' => $this->preferredLanguages,
         ));
     }
 
